@@ -26,8 +26,7 @@ class Tile(BaseObject):
         self.city = city
 
     def __repr__(self):
-        # return self.type_ + ', ' + ', '.join(self.units) + ', ' + self.city
-        return self.__dict__
+        return self.type_ + ', ' + ', '.join(self.units) + ', ' + self.city
 
     @staticmethod
     def create_random_tile():
@@ -91,10 +90,10 @@ class Unit(BaseObject):
         super(Unit, self).__init__()
 
         self.location = location
-        self.required_tech = required_tech  # for type
+        self.required_tech = required_tech
         self.production_cost = production_cost
 
-        self.movement_points = movement_points  # for type
+        self.movement_points = movement_points
 
         self.attack_strength_melee = attack_strength_melee
         self.attack_range_ranged = attack_range_ranged
@@ -270,7 +269,10 @@ class Game:
             player.step()
 
     def run_model(self):
-        for x in range(10):
+        for turn in range(10):
+            print('Starting turn number %s' % turn)
             self.step1()
             self.step2()
+        print('Preparing end game report')
+        print(self.world)
         print(self.players)
