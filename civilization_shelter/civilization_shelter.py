@@ -1,6 +1,9 @@
-from random import choice
 import random
+from random import choice
 
+class BaseObject():
+    def __repr__(self):
+        return self.__class__.__name__ + str(self.__dict__)
 
 class Resource(object):
     def __init__(self, arg):
@@ -14,7 +17,7 @@ class Improvement(object):
         self.arg = arg
 
 
-class Tile(object):
+class Tile(BaseObject):
     def __init__(self, type_, resource=None, improvements=None, units=[], city=''):
         self.type_ = type_
         self.resource = resource
@@ -23,7 +26,8 @@ class Tile(object):
         self.city = city
 
     def __repr__(self):
-        return self.type_ + ', ' + ', '.join(self.units) + ', ' + self.city
+        # return self.type_ + ', ' + ', '.join(self.units) + ', ' + self.city
+        return self.__dict__
 
     @staticmethod
     def create_random_tile():
@@ -35,15 +39,22 @@ class Tile(object):
         pass
 
 
-class World(object):
-    map_ = {}
-
+class World(BaseObject):
     def __init__(self):
-        print('World initiated')
-        return
+        self.map = {
+            (0, 0): Tile(type_='desert'),
+            (0, 1): Tile(type_='hill'),
+            (0, 2): Tile(type_='hill'),
+            (1, 0): Tile(type_='desert', improvements=['road', 'irrigation']),
+            (1, 1): Tile(type_='grassland', units=['warrior', 'worker'], city='Kaunas'),
+            (1, 2): Tile(type_='grassland'),
+            (2, 0): Tile(type_='desert'),
+            (2, 1): Tile(type_='grassland'),
+            (2, 2): Tile(type_='grassland'),
+        }
 
 
-class Tech(object):
+class Tech(BaseObject):
     def __init__(
             self,
             name: str,
@@ -63,7 +74,7 @@ class Tech(object):
         self.building_enabled = buildings_enabled
 
 
-class Unit(object):
+class Unit(BaseObject):
     def __init__(
             self,
             location,
@@ -103,7 +114,6 @@ class Unit(object):
         (1, -1)
         (0, -1)
         (-1, 0)
-        pass
 
     def get_promotion(self):
         pass
@@ -121,7 +131,7 @@ class Unit(object):
         pass
 
 
-class WorldGenerator(object):
+class WorldGenerator(BaseObject):
     def __init__(self, arg):
         super(WorldGenerator, self).__init__()
 
@@ -159,17 +169,15 @@ class WorldGenerator(object):
         pass
 
 
-class Player(object):
-    research = 0
-    culture = 0
-    faith = 0
-    required_research = 0
-    required_culture = 0
-    required_faith = 0
-
-    def __init__(self, arg):
+class Player(BaseObject):
+    def __init__(self):
         super(Player, self).__init__()
-        self.arg = arg
+        self.research = 0
+        self.culture = 0
+        self.faith = 0
+        self.required_research = 0
+        self.required_culture = 0
+        self.required_faith = 0
 
     def choose_religion(self):
         pass
@@ -178,10 +186,12 @@ class Player(object):
         pass
 
     def choose_research(self):
-        pass
+        if self.research >= self.required_research:
+            pass
 
     def choose_social_policy(self):
-        pass
+        if self.culture >= self.required_culture: 
+            pass
 
     def choose_city_production(self, city):
         pass
@@ -214,8 +224,14 @@ class Player(object):
         demographic['Production']
         demographic['....']
 
+    def step(self):
+        self.choose_research()
+        self.choose_social_policy()
 
-class City():
+
+class City(BaseObject):
+    """A city is a large human settlement.[4][5] Cities generally have extensive systems for housing, transportation, sanitation, utilities, land use, and communication. Their density facilitates interaction between people, government organizations and businesses, sometimes benefiting different parties in the process."""
+
     def yield_research(self):
         pass
 
@@ -231,38 +247,30 @@ class City():
     def yield_culture(self):
         pass
 
+    def step(self):
+        self.yield_research
+        self.yield_faith
+        self.yield_food
+        self.yield_production
+        self.yield_culture
 
-if __name__ == '__main__':
 
-    World.map_ = {
-        (0, 0): Tile(type_='desert'),
-        (0, 1): Tile(type_='hill'),
-        (0, 2): Tile(type_='hill'),
-        (1, 0): Tile(type_='desert', improvements=['road', 'irrigation']),
-        (1, 1): Tile(type_='grassland', units=['warrior', 'worker'], city='Kaunas'),
-        (1, 2): Tile(type_='grassland'),
-        (2, 0): Tile(type_='desert'),
-        (2, 1): Tile(type_='grassland'),
-        (2, 2): Tile(type_='grassland'),
-    }
-    print(World.map_)
+class Game:
+    def __init__(self, *args, **kwargs):
+        self.world = World()
+        self.cities = [City() for x in range(10)]
+        self.players = [Player() for x in range(10)]
 
-    Tile.create_random_tile()
+    def step1(self):
+        for city in self.cities:
+            city.step()
 
-    cities = [City() for x in range(10)]
-    for city in cities:
-        city.yield_research
-        city.yield_faith
-        city.yield_food
-        city.yield_production
-        city.yield_culture
+    def step2(self):
+        for player in self.players:
+            player.step()
 
-    players = [Player(x) for x in range(10)]
-    for player in players:
-        if player.research >= player.required_research:
-            player.choose_research
-        if player.culture >= player.required_culture:
-            player.choose_social_policy
-        if player.faith >= player.required_faith:
-            if random.random() > 0.5:  # todo
-                player.choose_social_policy
+    def run_model(self):
+        for x in range(10):
+            self.step1()
+            self.step2()
+        print(self.players)
